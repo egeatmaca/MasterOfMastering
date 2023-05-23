@@ -1,2 +1,2 @@
 # MasterOfMastering
-An experimental project to mix and master audio files automatically
+An experimental project to mix and master songs automatically
