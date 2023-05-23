@@ -1,0 +1,7 @@
+services:
+  
+  master_of_mastering:
+    image: master_of_mastering
+    build: .
+    volumes:
+      - .:/app
