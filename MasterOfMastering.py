@@ -5,38 +5,14 @@ import scipy.signal as signal
 import pydub
 import pydub.effects
 import os
+import config
+
+ZERO_DIVISION_ADJUSTMENT = 10**-10
 
 class MasterOfMastering:
-    DEFAULT_STEPS = ['normalization', 'equalization']
-
-    DEFAULT_SETTINGS = {
-        'equalization': {
-            'gain_adjustments': {
-                100: 0.5,  # 100 Hz band gain
-                1000: 0.2,  # 1000 Hz band gain
-                10000: -0.1  # 10000 Hz band gain
-            }
-        },
-        'compression': {
-            'threshold': 1.0,
-            'ratio': 1.5
-        }
-    }
-
-    PROFILES = {
-        'default': {
-            'equalization': {
-                # Define frequency bands
-                'low_freq_band': 10**2,
-                'mid_freq_band': 10**3,
-                'high_freq_band': 10**4,
-                # Define target energy levels for each frequency band,
-                'target_energy_low': 5,
-                'target_energy_mid': 4,
-                'target_energy_high': 3
-            }
-        }
-    }
+    DEFAULT_STEPS = config.DEFAULT_STEPS
+    DEFAULT_SETTINGS = config.DEFAULT_SETTINGS
+    PROFILES = config.PROFILES
 
 
     def __init__(self, input_path, output_path, steps=DEFAULT_STEPS, settings=DEFAULT_SETTINGS, profile='default'):
@@ -56,44 +32,32 @@ class MasterOfMastering:
         # Load equalization profile
         eq_profile = self.profile['equalization']
 
-        low_freq_band = eq_profile['low_freq_band']
-        mid_freq_band = eq_profile['mid_freq_band']
-        high_freq_band = eq_profile['high_freq_band']
-        
-        target_energy_low = eq_profile['target_energy_low']
-        target_energy_mid = eq_profile['target_energy_mid']
-        target_energy_high = eq_profile['target_energy_high']
-
         # Load audio file
         sample_rate, audio = wav.read(self.input_path)
 
         # Apply FFT to audio to obtain frequency spectrum
         frequency_bins, segment_spectrum = signal.periodogram(audio, fs=sample_rate, window='hamming')
-
-        # Calculate energy in each frequency band for each segment
-        energy_low = np.sum(segment_spectrum[:, (frequency_bins >= low_freq_band) &
-                                                      (frequency_bins < mid_freq_band)],
-                                    axis=1)
-        energy_mid = np.sum(segment_spectrum[:, (frequency_bins >= mid_freq_band) &
-                                                      (frequency_bins < high_freq_band)],
-                                    axis=1)
-        energy_high = np.sum(segment_spectrum[:, (frequency_bins >= high_freq_band) &
-                                                        (frequency_bins < high_freq_band * 10)], 
-                                    axis=1)
         
-        # Calculate mean energy in each frequency band
-        mean_energy_low = np.mean(energy_low)
-        mean_energy_mid = np.mean(energy_mid)
-        mean_energy_high = np.mean(energy_high)
+        # Initialize gain_adjustments
+        gain_adjustments = {}
 
-        # Determine gain adjustments based on energy differences
-        zero_division_adjustment = 10**-10
-        gain_adjustments = {
-            low_freq_band: (target_energy_low - mean_energy_low) / (mean_energy_low + zero_division_adjustment),
-            mid_freq_band: (target_energy_mid - mean_energy_mid) / (mean_energy_mid + zero_division_adjustment),
-            high_freq_band: (target_energy_high - mean_energy_high) / (mean_energy_high + zero_division_adjustment)
-        }
+        # For each frequency band and target energy in profile
+        for band, target_energy in eq_profile['target_band_energies'].items():
+            # Calculate energy in each frequency band for each segment
+            energy = np.sum(segment_spectrum[:, (frequency_bins >= band) &
+                                                 (frequency_bins < band * 10)],
+                                axis=1)
+            
+            # Calculate mean energy in each frequency band
+            mean_energy = np.mean(energy)
 
+            # Calculate gain adjustment
+            gain_adjustment = (target_energy - mean_energy) / (mean_energy + ZERO_DIVISION_ADJUSTMENT)
+
+            # Set equalization settings for band
+            gain_adjustments[band] = gain_adjustment
+
+        # Limit gain adjustments between -1 and 1
         for band, gain in gain_adjustments.items():
             if gain < -1:
                 gain_adjustments[band] = -1
@@ -104,35 +68,22 @@ class MasterOfMastering:
         eq_settings = {'gain_adjustments': gain_adjustments}
         self.settings['equalization'] = eq_settings
         return eq_settings
-
+    
 
     def calculate_compression_settings(self):
         # TODO: Implement compression settings calculation
         return self.DEFAULT_SETTINGS['compression']
 
+
     def clear_output(self):
         if os.path.exists(self.output_path):
             os.system('rm ' + self.output_path)
 
-    def apply_normalization_dep(self, normalization_gain):
-        # Load audio file
-        sample_rate, audio = wav.read(self.input_path)
 
-        # Normalize audio
-        normalized_audio = audio * normalization_gain
-
-        # Scale audio back to 16-bit signed integers
-        scaled_audio = np.int16(normalized_audio * 32767)
-
-        # Save normalized audio to output file
-        self.clear_output()
-        wav.write(self.output_path, sample_rate, scaled_audio)
-
-    
-    def apply_normalization(self):
+    def apply_normalization(self, headroom=0.1):
         # Load and normalize audio file with pydub
         audio = pydub.AudioSegment.from_file(self.input_path)
-        normalized_audio = pydub.effects.normalize(audio)
+        normalized_audio = pydub.effects.normalize(audio, headroom=headroom)
         self.clear_output()
         normalized_audio.export(self.output_path, format="wav")
 
@@ -206,6 +157,7 @@ class MasterOfMastering:
 
         # Reset input path to original
         self.input_path = input_path_copy
+
 
 if __name__ == "__main__":
     # Define input and output paths
