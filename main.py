@@ -6,7 +6,7 @@ if __name__ == "__main__":
     output_path = "audio/output.wav"
 
     # Create a MasterOfMastering instance
-    mom = MasterOfMastering(input_path, output_path)
+    mom = MasterOfMastering(input_path, output_path, profile='high')
 
     # Master audio
     mom.master_audio(automastering=True)

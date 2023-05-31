@@ -29,8 +29,11 @@ class MasterOfMastering:
 
 
     def calculate_equalization_settings(self):
-        # Load equalization profile
+        # Get equalization profile
         eq_profile = self.profile['equalization']
+
+        # Get target band energies from profile
+        target_band_energies = eq_profile['target_band_energies']
 
         # Load audio file
         sample_rate, audio = wav.read(self.input_path)
@@ -42,7 +45,7 @@ class MasterOfMastering:
         gain_adjustments = {}
 
         # For each frequency band and target energy in profile
-        for band, target_energy in eq_profile['target_band_energies'].items():
+        for band, target_energy in target_band_energies.items():
             # Calculate energy in each frequency band for each segment
             energy = np.sum(segment_spectrum[:, (frequency_bins >= band) &
                                                  (frequency_bins < band * 10)],
@@ -127,7 +130,7 @@ class MasterOfMastering:
 
         # Save compressed audio to output file
         self.clear_output()
-        wav.write(output_path, sample_rate, scaled_audio)
+        wav.write(self.output_path, sample_rate, scaled_audio)
 
     def master_audio(self, automastering=True):
         # Copy original input path to reset input path at the end
