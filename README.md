@@ -1,5 +1,5 @@
 # MasterOfMastering
-Automated song mastering
+A tool for automated song mastering
 
 # Getting Started
 
