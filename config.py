@@ -20,11 +20,11 @@ PROFILES = {
     'default': {
         'equalization': {
             'target_band_energies': {
-                1: 5,
-                10: 5,
-                100: 5,
-                1000: 4,
-                10000: 3,
+                1: 2,
+                10: 3,
+                100: 4,
+                1000: 5,
+                10000: 4,
             }
         }
     },
@@ -39,17 +39,6 @@ PROFILES = {
             }
         }
     },
-    'mid': {
-        'equalization': {
-            'target_band_energies': {
-                1: 2,
-                10: 3,
-                100: 4,
-                1000: 5,
-                10000: 4,
-            }
-        }
-    },
     'high': {
         'equalization': {
             'target_band_energies': {
@@ -61,7 +50,7 @@ PROFILES = {
             }
         }
     },
-    'hard_bass': {
+    'hardcore_bass': {
         'equalization': {
             'target_band_energies': {
                 1: 5,
@@ -69,6 +58,17 @@ PROFILES = {
                 100: 5,
                 1000: 2,
                 10000: 1,
+            }
+        }
+    },
+    'techno': {
+        'equalization': {
+            'target_band_energies': {
+                1: 5,
+                10: 5,
+                100: 5,
+                1000: 4,
+                10000: 3,
             }
         }
     },
