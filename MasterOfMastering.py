@@ -158,21 +158,6 @@ class MasterOfMastering:
         equalized_audio.export(self.output_path, format="wav")
 
 
-    # def apply_amplification(self, gain):
-    #     # Load audio file
-    #     sample_rate, audio = wav.read(self.input_path)
-
-    #     # Amplify audio
-    #     amplified_audio = audio * gain
-
-    #     # Scale audio back to 16-bit signed integers
-    #     scaled_audio = np.int16(amplified_audio * 32767)
-
-    #     # Save amplified audio to output file
-    #     self.clear_output()
-    #     wav.write(self.output_path, sample_rate, scaled_audio)
-
-
     def apply_compression(self, threshold, ratio):
         # Load audio file
         sample_rate, audio = wav.read(self.input_path)
