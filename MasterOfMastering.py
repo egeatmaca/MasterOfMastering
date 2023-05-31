@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import scipy.io.wavfile as wav
 import scipy.signal as signal
 import pydub
