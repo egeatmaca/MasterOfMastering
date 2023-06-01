@@ -2,8 +2,7 @@
 A Tool for Automated Song Mastering
 
 ## Description
-MasterOfMastering is a tool for automated song mastering. It calculates effect parameters and applies effects based on pre-specified profiles. \
-*** It only supports vaw files for now.
+MasterOfMastering is a tool for automated song mastering. It calculates effect parameters and applies effects based on pre-specified profiles. It only supports vaw files for now.
 
 ## Command Line Interface (CLI)
 Command line interface is a convenient way to use the tool. It is available for Linux and Mac OS.
