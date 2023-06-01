@@ -1,5 +1,5 @@
 # MasterOfMastering
-A tool for Automated Song Mastering
+A Tool for Automated Song Mastering
 
 ## Description
 MasterOfMastering is a tool for automated song mastering. It calculates effect parameters and applies effects based on pre-specified profiles. \
